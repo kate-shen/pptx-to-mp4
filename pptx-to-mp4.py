@@ -57,7 +57,7 @@ for slide in range(len(slide_list)):
     if flag_no_audio == False:
         video_out = FFmpeg().option("y").option(key="loop", value=1).input(image_name).input(audio_name).output(output_name, shortest=None, vcodec="libx264", acodec="aac")
     else: 
-        video_out = FFmpeg().option("y").option(key="loop", value=1).input(image_name).output(output_name, vcodec="libx264", duration=5)
+        video_out = FFmpeg().option("y").option(key="loop", value=1).input(image_name).output(output_name, {"t":"5"}, vcodec="libx264")
     video_out.execute()
     tock = time.perf_counter()
     render_time = tock - tick
