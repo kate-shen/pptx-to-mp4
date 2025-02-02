@@ -45,16 +45,28 @@ for audio_file in audio_list:
     shutil.copy(os.path.join(media_dir,audio_file), working_subdir)
 os.chdir(working_subdir)
 for slide in range(len(slide_list)):
-    audio_name = slide_list[slide]
-    image_name = audio_list[slide]
+    image_name = slide_list[slide]
+    flag_no_audio = False
+    try:
+        audio_name = audio_list[slide]
+    except:
+        logging.warning("No audio found for slide " + str(slide + 1) + " of " + str(len(slide_list)))
+        flag_no_audio = True
     output_name = "".join(["output", str(slide), ".ts"])
     tick = time.perf_counter()
-    video_out = FFmpeg().option("y").option(key="loop", value=1).input(audio_name).input(image_name).output(output_name, shortest=None, vcodec="libx264", acodec="aac")
+    if flag_no_audio == False:
+        video_out = FFmpeg().option("y").option(key="loop", value=1).input(image_name).input(audio_name).output(output_name, shortest=None, vcodec="libx264", acodec="aac")
+    else: 
+        video_out = FFmpeg().option("y").option(key="loop", value=1).input(image_name).output(output_name, vcodec="libx264", duration=5)
     video_out.execute()
     tock = time.perf_counter()
     render_time = tock - tick
-    audio_length = float(audio_file_durations[slide])
-    speed_up = audio_length/render_time
+    if flag_no_audio == False: 
+        audio_length = float(audio_file_durations[slide])
+        speed_up = audio_length/render_time
+    else: 
+        audio_length = 0
+        speed_up = 0
     logging.info("".join(["Slide ", str(slide + 1), " of ", str(len(slide_list)), ": ", str(round(audio_length, 2)), " seconds. Render: ", str(round(render_time, 2)), " seconds, speed-up ", str(round(speed_up, 2)), " x."]))
 
 # Concatenate all intermediate files to a full video
